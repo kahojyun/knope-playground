@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+env:
+  KNOPE_VERSION: 0.22.4
+
+jobs:
+  release:
+    if: github.head_ref == 'release' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT }}
+
+      - uses: knope-dev/action@v2.1.2
+        with:
+          version: ${{ env.KNOPE_VERSION }}
+
+      - name: Create GitHub Release
+        run: knope release --verbose
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
