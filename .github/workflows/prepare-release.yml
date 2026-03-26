@@ -30,23 +30,20 @@ jobs:
         with:
           version: ${{ env.KNOPE_VERSION }}
 
-      - name: Check For Release Changes
-        run: knope --dry-run plan-release --verbose | tee "$RUNNER_TEMP/knope-plan.txt"
+      - name: Check whether a release is needed
+        id: plan
+        run: |
+          knope --dry-run plan-release > "$RUNNER_TEMP/knope-plan.txt"
+          if [ -s "$RUNNER_TEMP/knope-plan.txt" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
 
-      - name: Decide Whether To Release
-        id: release-check
-        run: |
-          if grep -q "No packages to release" "$RUNNER_TEMP/knope-plan.txt"; then
-            echo "No release changes detected."
-            echo "should_release=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "should_release=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Prepare Release PR
-        if: steps.release-check.outputs.should_release == 'true'
+        if: steps.plan.outputs.has_changes == 'true'
         run: knope prepare-release --verbose
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
