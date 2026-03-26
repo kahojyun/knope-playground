@@ -1,5 +1,5 @@
 pub fn greeting() -> &'static str {
-    "hello from the validated knope playground!"
+    "hello from the validated knope playground release flow!"
 }
 
 #[cfg(test)]
@@ -8,6 +8,9 @@ mod tests {
 
     #[test]
     fn greeting_is_stable() {
-        assert_eq!(greeting(), "hello from the validated knope playground!");
+        assert_eq!(
+            greeting(),
+            "hello from the validated knope playground release flow!"
+        );
     }
 }
